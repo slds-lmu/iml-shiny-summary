@@ -112,7 +112,7 @@ ui = dashboardPage(
               box(
                 width = NULL,
                 solidHeader = TRUE,
-                h2("PDP"),
+                h2("IML-Summary"),
                 p(""),
                 HTML("")
               ),
@@ -192,7 +192,7 @@ server = function(input, output){
     inFile <- input$PrObj
     if (is.null(inFile))
       return(NULL)
-    
+    PrediObj <- readRDS(inFile$datapath)
     x= PrediObj$data$get.x()
     target = PrediObj$data$y
     #dat = PrediObj$data$get.xy()
