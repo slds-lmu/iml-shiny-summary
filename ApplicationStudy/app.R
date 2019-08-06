@@ -163,16 +163,16 @@ server = function(input, output){
   
   output$pdpplot = DT::renderDataTable({
     # draw callback needed for sparklines
-    cb <- htmlwidgets::JS('function(){debugger;HTMLWidgets.staticRender();}')
+    cb = htmlwidgets::JS('function(){debugger;HTMLWidgets.staticRender();}')
     
     # https://stackoverflow.com/questions/20875081/properly-rendering-sparklines-in-a-datatable 
     # input$Prdi  will be NULL initially. After the user selects
     # and uploads a file.
-    inFile <- input$PrObj
+    inFile = input$PrObj
     if (is.null(inFile))
       return(NULL)
-    PrediObj <- readRDS(inFile$datapath)
-    x= PrediObj$data$get.x()
+    PrediObj = readRDS(inFile$datapath)
+    x = PrediObj$data$get.x()
     target = PrediObj$data$y
     #dat = PrediObj$data$get.xy()
     dat = as.data.frame(cbind(x,target))
