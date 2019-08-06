@@ -66,24 +66,6 @@ ui = dashboardPage(
       fluidRow(
         column(
           width = 12,
-          tabsetPanel(
-            id = "tabPanelId",
-            tabPanel(
-              # This tab allows to set up individual values for all features
-              "Variables",
-              fluidRow(
-                column(
-                  width = 8,
-                  box(
-                    width = NULL,
-                    solidHeader = TRUE,
-                    # height = "190px",
-                    p("give variables a appropriate name"),
-                    p("all variables should be independent( Assumption for pdp plot)"),
-                    p("Factor variable must have levels.")
-                  )
-                )
-              ),
               ## upload a RDS. file 
               fluidRow(
                 titlePanel("Save your Predictor Object that created from iml package 
@@ -101,10 +83,7 @@ ui = dashboardPage(
                     tableOutput('uploadFilePredi') ## can't delete  and make no sense
                   )
                 )
-              )
-            )
-          ),
-          
+             ),
           ## describe PDP
           fluidRow(
             column(
@@ -193,7 +172,7 @@ server = function(input, output){
     if (is.null(inFile))
       return(NULL)
     PrediObj <- readRDS(inFile$datapath)
-    x= PrediObj$data$get.x()
+    x= PrediObj$zdata$get.x()
     target = PrediObj$data$y
     #dat = PrediObj$data$get.xy()
     dat = as.data.frame(cbind(x,target))
