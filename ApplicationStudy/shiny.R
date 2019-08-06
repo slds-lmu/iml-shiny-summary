@@ -172,7 +172,7 @@ server = function(input, output){
     if (is.null(inFile))
       return(NULL)
     PrediObj <- readRDS(inFile$datapath)
-    x= PrediObj$zdata$get.x()
+    x= PrediObj$data$get.x()
     target = PrediObj$data$y
     #dat = PrediObj$data$get.xy()
     dat = as.data.frame(cbind(x,target))
