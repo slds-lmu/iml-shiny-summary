@@ -54,62 +54,62 @@ ui = dashboardPage(
             tags$a(href="https://christophm.github.io/interpretable-ml-book/", "iml book by Christoph Molnar"),
             br(),
             tags$a(href="https://juliafried.shinyapps.io/MunichRentIndex/", "an example by Julia Fried")
-              ),
+          ),
           column(
             width = 1
           )
-          )
-    ),
-    # ~ ui global --------------------------------------------------------------------------------------------------
-    tabItem(
-      tabName = "global",
-      fluidRow(
-        column(
-          width = 12,
-              ## upload a RDS. file 
-              fluidRow(
-                titlePanel("Save your Predictor Object that created from iml package 
+        )
+      ),
+      # ~ ui global --------------------------------------------------------------------------------------------------
+      tabItem(
+        tabName = "global",
+        fluidRow(
+          column(
+            width = 12,
+            ## upload a RDS. file 
+            fluidRow(
+              titlePanel("Save your Predictor Object that created from iml package 
                            as PrediObj.RDS and upload this file"),
-                sidebarLayout(
-                  sidebarPanel(
-                    fileInput('PrObj', 'Choose file to upload',
-                              accept = c(
-                                'RDS.',
-                                'rds.'
-                     )
-                    )
-                  ),
-                  mainPanel(
-                    tableOutput('uploadFilePredi') ## can't delete  and make no sense
+              sidebarLayout(
+                sidebarPanel(
+                  fileInput('PrObj', 'Choose file to upload',
+                            accept = c(
+                              'RDS.',
+                              'rds.'
+                            )
                   )
+                ),
+                mainPanel(
+                  tableOutput('uploadFilePredi') ## can't delete  and make no sense
                 )
-             ),
-          ## describe PDP
-          fluidRow(
-            column(
-              width = 9,
-              box(
-                width = NULL,
-                solidHeader = TRUE,
-                h2("IML-Summary"),
-                p(""),
-                HTML("")
-              ),
-              
-              # table
-              box(
-                width = NULL,
-                solidHeader = TRUE,
-                DT::dataTableOutput("pdpplot")
               )
-            ),  # External links
-            column(
-              width = 3,
-              box(
-                width = NULL,
-                solidHeader = TRUE,
-                h4("Links for more Explanations"),
-                HTML(paste("
+            ),
+            ## describe PDP
+            fluidRow(
+              column(
+                width = 9,
+                box(
+                  width = NULL,
+                  solidHeader = TRUE,
+                  h2("IML-Summary"),
+                  p(""),
+                  HTML("")
+                ),
+                
+                # table
+                box(
+                  width = NULL,
+                  solidHeader = TRUE,
+                  DT::dataTableOutput("pdpplot")
+                )
+              ),  # External links
+              column(
+                width = 3,
+                box(
+                  width = NULL,
+                  solidHeader = TRUE,
+                  h4("Links for more Explanations"),
+                  HTML(paste("
                          <b>Partial Dependence Plots (PDP)</b>
                          <ul><li><a href='https://christophm.github.io/interpretable-ml-book/pdp.html' target='_blank'>IML book</a></li>
                          <li><a href='https://mlr-org.github.io/mlr/articles/tutorial/partial_dependence.html' target='_blank'>Tutorial with package mlr</a></li>
@@ -119,39 +119,39 @@ ui = dashboardPage(
                          <ul><li><a href='https://christophm.github.io/interpretable-ml-book/feature-importance.html' target='_blank'>IML book</a></li>
                          <li><a href='https://github.com/christophM/iml/blob/master/inst/doc/intro.Rmd' target='_blank'>Tutorial with package iml</a></li></ul>
                          "))
+                ),
+                
+                # Scroll down option
+                box(
+                  width = NULL,
+                  solidHeader = TRUE,
+                  h4("Info: Feature Explanations below!"),
+                  actionButton("ctSend", "Scroll down")
+                )
               ),
               
-              # Scroll down option
-              box(
-                width = NULL,
-                solidHeader = TRUE,
-                h4("Info: Feature Explanations below!"),
-                actionButton("ctSend", "Scroll down")
+              # Tabs with variable explanations
+              column(
+                width = 12,
+                box(
+                  width = NULL,
+                  solidHeader = TRUE,
+                  title = "Explanation of Features",
+                  uiOutput("varExplanation"),
+                  br(),
+                  actionButton("scrollUp", "Scroll up")
+                )
               )
-            ),
-            
-            # Tabs with variable explanations
-            column(
-              width = 12,
-              box(
-                width = NULL,
-                solidHeader = TRUE,
-                title = "Explanation of Features",
-                uiOutput("varExplanation"),
-                br(),
-                actionButton("scrollUp", "Scroll up")
-              )
+              
             )
-            
           )
         )
       )
-     )
     )
   ),
   # Needed to plot the sparkline in DT
   htmlwidgets::getDependency("sparkline", "sparkline")
-        )
+)
 
 # server ---------------------------------------------------------------------------------------------------------------------
 server = function(input, output){
@@ -177,7 +177,7 @@ server = function(input, output){
     #dat = PrediObj$data$get.xy()
     dat = as.data.frame(cbind(x,target))
     mod = PrediObj$model
-    pd.big = pdPlot(mod, x, target)
+    pd.big = pdPlot(p =  PrediObj, mod, x, target)
     
     # var.names = colnames(x)
     dat.type = as.data.frame(sapply(x, class))
@@ -436,13 +436,16 @@ server = function(input, output){
   
   
   # Explain all variables
- output$varExplanation = renderUI({
-   
+  output$varExplanation = renderUI({
+    inFile = input$PrObj
+    if (is.null(inFile))
+      return(NULL)
+    PrediObj = readRDS(inFile$datapath)
     x= PrediObj$data$get.x()
     target = PrediObj$data$y
     dat = PrediObj$data$get.xy()
     mod = PrediObj$model
-    pd.big = pdPlot(mod, x, target)
+    pd.big = pdPlot(p = PrediObj, mod, x, target)
     
     # reorder variables -- name
     feat.name = as.data.frame(names(x))
@@ -454,7 +457,7 @@ server = function(input, output){
     })
     # sort variables alphabetically
     names = sort(unlist(name))
-  
+    
     
     pd.big.plot = lapply(1:length(names), function(i){
       output$plotname = renderPlot({
@@ -466,7 +469,7 @@ server = function(input, output){
       tabPanel(title = names[[i]], 
                # create two columns
                fluidRow(
-               
+                 
                  column(4, pd.big.plot[[i]])
                )
       )

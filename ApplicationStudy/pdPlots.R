@@ -1,7 +1,6 @@
-pdPlot = function(mod, x, target){
+pdPlot = function(p, mod, x, target){
   
   # IML basis model
-  p = PrediObj
   
   dat.type = as.data.frame(sapply(x, class))
   feat.name = as.data.frame(names(x))
