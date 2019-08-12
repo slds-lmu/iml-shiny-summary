@@ -161,17 +161,22 @@ server = function(input, output){
   # setting this option. Here we'll raise limit to 100MB.
   options(shiny.maxRequestSize = 100*1024^2)
   
+  dataInput = reactive({
+    inFile = input$PrObj
+    PrediObj = readRDS(inFile$datapath)
+  })
+
+  
   output$pdpplot = DT::renderDataTable({
     # draw callback needed for sparklines
     cb = htmlwidgets::JS('function(){debugger;HTMLWidgets.staticRender();}')
-    
-    # https://stackoverflow.com/questions/20875081/properly-rendering-sparklines-in-a-datatable 
-    # input$Prdi  will be NULL initially. After the user selects
-    # and uploads a file.
     inFile = input$PrObj
     if (is.null(inFile))
       return(NULL)
-    PrediObj = readRDS(inFile$datapath)
+    # https://stackoverflow.com/questions/20875081/properly-rendering-sparklines-in-a-datatable 
+    # input$Prdi  will be NULL initially. After the user selects
+    # and uploads a file.
+    PrediObj = dataInput()
     x = PrediObj$data$get.x()
     target = PrediObj$data$y
     #dat = PrediObj$data$get.xy()
@@ -437,10 +442,7 @@ server = function(input, output){
   
   # Explain all variables
   output$varExplanation = renderUI({
-    inFile = input$PrObj
-    if (is.null(inFile))
-      return(NULL)
-    PrediObj = readRDS(inFile$datapath)
+    PrediObj = dataInput()
     x= PrediObj$data$get.x()
     target = PrediObj$data$y
     dat = PrediObj$data$get.xy()
