@@ -16,7 +16,8 @@ ui = dashboardPage(
     sidebarMenu(
       id = "tabs",
       menuItem("Introduction", tabName = "intro", icon = icon("home")),
-      menuItem("Global Effects", tabName = "global", icon = icon("globe"))
+      menuItem("Global Effects", tabName = "global", icon = icon("globe")),
+      menuItem("Local Interpretation", tabName = "local", icon = icon("table"))
     )
   ),
   
@@ -146,8 +147,22 @@ ui = dashboardPage(
             )
           )
         )
+      ), 
+      # ~ ui intro --------------------------------------------------------------------------------------
+      tabItem(
+        tabName = "local",
+        fluidRow(
+          column(
+            width = 1
+          ),
+          DT::dataTableOutput("df"),
+          column(
+            width = 1
+          )
+        )
       )
-    )
+    
+      )
   ),
   # Needed to plot the sparkline in DT
   htmlwidgets::getDependency("sparkline", "sparkline")
@@ -165,7 +180,6 @@ server = function(input, output){
     inFile = input$PrObj
     PrediObj = readRDS(inFile$datapath)
   })
-
   
   output$pdpplot = DT::renderDataTable({
     # draw callback needed for sparklines
@@ -182,7 +196,7 @@ server = function(input, output){
     #dat = PrediObj$data$get.xy()
     dat = as.data.frame(cbind(x,target))
     mod = PrediObj$model
-    pd.big = pdPlot(p =  PrediObj, mod, x, target)
+    pd.big = pdPlot(p = PrediObj, mod, x, target)
     
     # var.names = colnames(x)
     dat.type = as.data.frame(sapply(x, class))
@@ -200,7 +214,6 @@ server = function(input, output){
       }
     })
     valid.num.feat = unlist(valid.num)
-    
     
     # calculate feature important
     fi = FeatureImp$new(PrediObj, loss = "mae", n.repetitions = 20)
@@ -490,7 +503,25 @@ server = function(input, output){
     js$toTop (input$scrollUp)
   })
   
+  
+  # ~ server local ---
+  output$df = renderDT({
+    
+    inFile = input$PrObj
+    if (is.null(inFile))
+      return(NULL)
+    # https://stackoverflow.com/questions/20875081/properly-rendering-sparklines-in-a-datatable 
+    # input$Prdi  will be NULL initially. After the user selects
+    # and uploads a file.
+    PrediObj = dataInput()
+    PrediObj$data$get.xy()
+  })
+  
 }
+
+
+
+
 
 
 

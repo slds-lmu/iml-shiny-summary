@@ -7,4 +7,4 @@ learner =regr.lrn = makeLearner("regr.gbm", par.vals = list(n.trees = 500, inter
 mod.mlr = train(learner, task)
 PrediObj = Predictor$new(mod.mlr, data = BostonHousing)
 saveRDS(PrediObj, file = "PrediObj.RDS")
-PrediObj <- readRDS("C:/Users/caize/iml-shiny-summary/ApplicationStudy/PrediObj.RDS")
+PrediObj <- readRDS("PrediObj.RDS")
