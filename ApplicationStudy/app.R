@@ -156,40 +156,38 @@ ui = dashboardPage(
       tabItem(
         tabName = "local",
         fluidRow(
-          
           column(
-            width = 1
-          ),
-          
-          DT::dataTableOutput("df"),
-          
+            width = 12,
+            box(
+              width = NULL,
+              title = "Your data",
+              solidHeader = TRUE,
+              DT::dataTableOutput("df"))
+          )),
+        
+        
           column(
-            width = 1
-          ),
+            width = 12,
           
-          # column(
-          #   width = 12,
-          #   box(
-          #     width = NULL,
-          #     title = "Your Results",
-          #     solidHeader = TRUE,
-          #     withSpinner(htmlOutput("pred_y"))
-          #   )
-          # ),
-          column(
-            width = 1
-          ),
+          box(
+            width = NULL,
+            title = "Explain the Outcome of your Results with Shapley Explanations",
+            solidHeader = TRUE,
+            DT::dataTableOutput("shapleyValue")),
           
-          DT::dataTableOutput("shapleyValue"),
+          box(
+            width = NULL,
+            title = "Plot with Shapley Values",
+            solidHeader = TRUE,
+            plotOutput("shapleyValuePlot", width = "82%", height = "400px", click = NULL,
+                       dblclick = NULL, hover = NULL, hoverDelay = NULL,
+                       hoverDelayType = NULL, brush = NULL, clickId = NULL,
+                       hoverId = NULL, inline = FALSE))
           
-          column(
-            width = 1
-          ),
-         
-          plotOutput("shapleyValuePlot", width = "100%", height = "400px", click = NULL,
-                     dblclick = NULL, hover = NULL, hoverDelay = NULL,
-                     hoverDelayType = NULL, brush = NULL, clickId = NULL,
-                     hoverId = NULL, inline = FALSE)
+        
+        
+        
+        
           
         )
       )
@@ -490,6 +488,9 @@ server = function(input, output){
   
   # Explain all variables
   output$varExplanation = renderUI({
+    inFile = input$PrObj
+    if (is.null(inFile))
+      return(NULL)
     PrediObj = dataInput()
     x= PrediObj$data$get.x()
     target = PrediObj$data$y
@@ -561,17 +562,32 @@ server = function(input, output){
     x.interest = X[6,]
     model_data = Predictor$new(PrediObj$model, data = X)
     shapley = Shapley$new(predictor = model_data, x.interest = x.interest, sample.size = 100)
-    shapley$results
+    shapley$results[,c(1, 4, 2, 3)]
   })
   
   
   # Show the plot of shapley values of the specified instance in a data table
   output$shapleyValuePlot = renderPlot({
-  
-  plot(shapley)
+    inFile = input$PrObj
+    if (is.null(inFile))
+      return(NULL)
+    PrediObj = dataInput()
+    X = as.data.frame(PrediObj$data$get.x())
+    x.interest = X[6,]
+    model_data = Predictor$new(PrediObj$model, data = X)
+    shapley = Shapley$new(predictor = model_data, x.interest = x.interest, sample.size = 100)
+    plot(shapley)
   
   })
-
+  # Scroll down to variable explanations
+  observeEvent(input$ctSend, {
+    js$pageCol (input$ctSend)
+  })
+  
+  # Scroll up to top of page
+  observeEvent(input$scrollUp, {
+    js$toTop (input$scrollUp)
+  })
   
   # output$pred = renderText({
   #   inFile = input$PrObj
