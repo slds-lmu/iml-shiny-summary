@@ -48,9 +48,13 @@ ui = dashboardPage(
                 research, products and processes. Interpretable Machine Learning aims at making 'boxes' transparent."),
               p("This dashboard aims at creating a iml-summary in a much easier way for users. The idea of this APP is to 
                supplement the fantastic APP that Julia Fried has written (an application study using 
-                the Munich Rent Index). The dashboard provides an summary for your model with Interpretable Machine Learning. 
-                Save your predictor object as .RDS file and upload it. Then, your get a table in few minutes, which includes variable' names, 
-                and corresponding value ranges, partial dependence plots(PDPs) and their feature importance.")),
+                the Munich Rent Index). The dashboard provides an summary for your model with Interpretable Machine Learning.
+                
+                There is a right-click menu. Click Global Effects, save your predictor object as .RDS file and upload it. Then, 
+                your get a table in few minutes, which includes variables' names,corresponding value ranges, partial dependence 
+                plots(PDPs) and their feature importance.
+                Click Local Interpretation, you will see the data set on the top. Then, if you select a certain row, the corresponding
+                shapley values and its plot will be shown automatically as follows")),
             br(),
             tags$a(href="https://christophm.github.io/interpretable-ml-book/", "iml book by Christoph Molnar"),
             br(),
@@ -152,15 +156,46 @@ ui = dashboardPage(
       tabItem(
         tabName = "local",
         fluidRow(
+          
           column(
             width = 1
           ),
+          
           DT::dataTableOutput("df"),
+          
           column(
             width = 1
-          )
+          ),
+          
+          # column(
+          #   width = 12,
+          #   box(
+          #     width = NULL,
+          #     title = "Your Results",
+          #     solidHeader = TRUE,
+          #     withSpinner(htmlOutput("pred_y"))
+          #   )
+          # ),
+          column(
+            width = 1
+          ),
+          
+          DT::dataTableOutput("shapleyValue"),
+          
+          column(
+            width = 1
+          ),
+         
+          plotOutput("shapleyValuePlot", width = "100%", height = "400px", click = NULL,
+                     dblclick = NULL, hover = NULL, hoverDelay = NULL,
+                     hoverDelayType = NULL, brush = NULL, clickId = NULL,
+                     hoverId = NULL, inline = FALSE)
+          
         )
       )
+      
+      
+      
     
       )
   ),
@@ -504,22 +539,58 @@ server = function(input, output){
   })
   
   
-  # ~ server local ---
+  # ~ server local --------------------------------------------------------------------------------
+  # show the data in a data table
   output$df = renderDT({
-    
-    inFile = input$PrObj
+        inFile = input$PrObj
     if (is.null(inFile))
       return(NULL)
-    # https://stackoverflow.com/questions/20875081/properly-rendering-sparklines-in-a-datatable 
-    # input$Prdi  will be NULL initially. After the user selects
-    # and uploads a file.
     PrediObj = dataInput()
     PrediObj$data$get.xy()
   })
   
+  
+  
+  # Show shapley values of the specified instance in a data table
+  output$shapleyValue = renderDT({
+    inFile = input$PrObj
+    if (is.null(inFile))
+      return(NULL)
+    PrediObj = dataInput()
+    X = as.data.frame(PrediObj$data$get.x())
+    x.interest = X[6,]
+    model_data = Predictor$new(PrediObj$model, data = X)
+    shapley = Shapley$new(predictor = model_data, x.interest = x.interest, sample.size = 100)
+    shapley$results
+  })
+  
+  
+  # Show the plot of shapley values of the specified instance in a data table
+  output$shapleyValuePlot = renderPlot({
+  
+  plot(shapley)
+  
+  })
+
+  
+  # output$pred = renderText({
+  #   inFile = input$PrObj
+  #   if (is.null(inFile))
+  #     return(NULL)
+  #   # https://stackoverflow.com/questions/20875081/properly-rendering-sparklines-in-a-datatable 
+  #   # input$Prdi  will be NULL initially. After the user selects
+  #   # and uploads a file.
+  #   PrediObj = dataInput()
+  #   X = as.data.frame(PrediObj$data$get.x())
+  #   x.interest = X[6,]
+  #   model_data = Predictor$new(PrediObj$model, data = X)
+  #   shapley = Shapley$new(predictor = model_data, x.interest = x.interest, sample.size = 100)
+  #   pred_y = sh$y.hat.interest
+  #   HTML(paste("The predicted of y is ","<font size='+2'>", round(pred_y, 2), 
+  #              "</font>", "per unit. </br>"
+  #   ))
+  # })
 }
-
-
 
 
 
