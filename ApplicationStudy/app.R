@@ -1,18 +1,17 @@
 source("libraries.R") # add new libraries if needed
 source("pdPlots.R")  # get big pdp plot 
 
-
 # needed to scroll up and down
 textsfile = "shinyjs.pageCol = function(){window.scrollTo(0,document.body.scrollHeight);};
 shinyjs.toTop = function(){window.scrollTo(0,0);};"
 
-
 # ui --------------------------------------------------------------------------------------------------------------------------------
 ui = dashboardPage(
   skin = "green",
-  dashboardHeader(title = "IML-Shiny"),
+  dashboardHeader(title = "IML-Shiny", titleWidth = 190
+                  ),
   dashboardSidebar(
-    width = 200,
+    width = 190,
     sidebarMenu(
       id = "tabs",
       menuItem("Introduction", tabName = "intro", icon = icon("home")),
@@ -26,15 +25,13 @@ ui = dashboardPage(
     # needed to scroll up and down
     extendShinyjs(text = textsfile),
     tabItems(
+      
       # ~ ui intro --------------------------------------------------------------------------------------
       tabItem(
         tabName = "intro",
         fluidRow(
-          column(
-            width = 1
-          ),
-          column(
-            width = 10,
+          column(width = 1),
+          column(width = 10,
             box(
               width = NULL,
               solidHeader = TRUE,
@@ -58,37 +55,26 @@ ui = dashboardPage(
             br(),
             tags$a(href="https://christophm.github.io/interpretable-ml-book/", "iml book by Christoph Molnar"),
             br(),
-            tags$a(href="https://juliafried.shinyapps.io/MunichRentIndex/", "an example by Julia Fried")
-          ),
+            tags$a(href="https://juliafried.shinyapps.io/MunichRentIndex/", "an example by Julia Fried")),
           column(
             width = 1
           )
         )
       ),
+      
       # ~ ui global --------------------------------------------------------------------------------------------------
       tabItem(
         tabName = "global",
         fluidRow(
-          column(
-            width = 12,
-            ## upload a RDS. file 
-            fluidRow(
-              titlePanel("Save your Predictor Object that created from iml package 
+          column(width = 12,
+                 ## upload a RDS. file 
+                 fluidRow(titlePanel("Save your Predictor Object that created from iml package 
                            as PrediObj.RDS and upload this file"),
-              sidebarLayout(
-                sidebarPanel(
-                  fileInput('PrObj', 'Choose file to upload',
-                            accept = c(
-                              'RDS.',
-                              'rds.'
-                            )
+                  sidebarLayout(
+                  sidebarPanel(fileInput('PrObj', 'Choose file to upload',accept = c('RDS.','rds.'))),
+                  mainPanel(tableOutput('uploadFilePredi')) ## can't delete  and make no sense
                   )
-                ),
-                mainPanel(
-                  tableOutput('uploadFilePredi') ## can't delete  and make no sense
-                )
-              )
-            ),
+                 ),
             ## describe PDP
             fluidRow(
               column(
@@ -96,7 +82,7 @@ ui = dashboardPage(
                 box(
                   width = NULL,
                   solidHeader = TRUE,
-                  h2("IML-Summary"),
+                  h2("IML-Summary with PDP plots"),
                   p(""),
                   HTML("")
                 ),
@@ -115,14 +101,16 @@ ui = dashboardPage(
                   solidHeader = TRUE,
                   h4("Links for more Explanations"),
                   HTML(paste("
+                         <b>Introduction to iml</b>
+                         <ul><li><a href='https://cran.r-project.org/web/packages/iml/vignettes/intro.html' target='_blank'>Interpretable Machine Learning in R</a></li>
+                         </ul>
                          <b>Partial Dependence Plots (PDP)</b>
                          <ul><li><a href='https://christophm.github.io/interpretable-ml-book/pdp.html' target='_blank'>IML book</a></li>
                          <li><a href='https://mlr-org.github.io/mlr/articles/tutorial/partial_dependence.html' target='_blank'>Tutorial with package mlr</a></li>
-                         <li><a href='https://github.com/christophM/iml/blob/master/inst/doc/intro.Rmd' target='_blank'>Tutorial with package iml</a></li>
                          </ul>
                          <b>Feature Importance</b>
                          <ul><li><a href='https://christophm.github.io/interpretable-ml-book/feature-importance.html' target='_blank'>IML book</a></li>
-                         <li><a href='https://github.com/christophM/iml/blob/master/inst/doc/intro.Rmd' target='_blank'>Tutorial with package iml</a></li></ul>
+                         </ul>                
                          "))
                 ),
                 
@@ -147,15 +135,15 @@ ui = dashboardPage(
                   actionButton("scrollUp", "Scroll up")
                 )
               )
-              
             )
           )
         )
       ), 
-      # ~ ui intro --------------------------------------------------------------------------------------
+      # ~ ui local --------------------------------------------------------------------------------------
       tabItem(
         tabName = "local",
         fluidRow(
+          
           column(
             width = 12,
             box(
@@ -163,46 +151,88 @@ ui = dashboardPage(
               title = "Your data",
               solidHeader = TRUE,
               DT::dataTableOutput("df"))
-          )),
-        
-        
+          ),
+          
           column(
             width = 12,
+            box(
+              width = NULL,
+              solidHeader = TRUE,
+              # background = "black",
+              # collapsible=TRUE,
+              title = "Select an instance that you want to calculate the shapley values and plot",#, br(), "More box content",
+              textInput("instance", "instance:")
+            )
+          ),
           
-          box(
-            width = NULL,
-            title = "Explain the Outcome of your Results with Shapley Explanations",
-            solidHeader = TRUE,
-            DT::dataTableOutput("shapleyValue")),
           
-          box(
-            width = NULL,
-            title = "Plot with Shapley Values",
-            solidHeader = TRUE,
-            plotOutput("shapleyValuePlot", width = "82%", height = "400px", click = NULL,
-                       dblclick = NULL, hover = NULL, hoverDelay = NULL,
-                       hoverDelayType = NULL, brush = NULL, clickId = NULL,
-                       hoverId = NULL, inline = FALSE))
-          
-        
-        
-        
-        
-          
+          column(
+            width = 9,
+            tabsetPanel(
+              id = "tabPanelId",
+              
+              tabPanel(
+                # This tab allows to set up individual values for all features
+                "Output of shapley value",
+                fluidRow(
+                  column(
+                    width = 12,
+                    box(
+                      width = NULL,
+                      title = "Explain the Outcome of your Results with Shapley Explanations",
+                      solidHeader = TRUE,
+                      DT::dataTableOutput("shapleyValue"))
+                  )
+                )
+              ),
+              tabPanel(
+                "Plot",
+                # The output tab shows the prediction and Shapley explanations
+                fluidRow(
+                  # Tabs with variable explanations
+                  column(
+                    width = 12,
+                    
+                    box(
+                      width = NULL,
+                      title = "Plot with Shapley Values",
+                      solidHeader = TRUE,
+                      plotOutput("shapleyValuePlot", width = "82%", height = "400px", click = NULL,
+                                 dblclick = NULL, hover = NULL, hoverDelay = NULL,
+                                 hoverDelayType = NULL, brush = NULL, clickId = NULL,
+                                 hoverId = NULL, inline = FALSE)
+                    )
+                  )
+                  
+                )
+              )
+              
+            )
+             
+          ),
+          column(
+            width = 3,
+            box(
+              width = NULL,
+              
+              h4("Links for more Explanations"),
+              HTML(paste("
+                         <b>Shapley Values</b>
+                         <ul><li><a href='https://christophm.github.io/interpretable-ml-book/shapley.html' target='_blank'>IML book</a></li>
+                         </ul>
+                         "))
+            )
+          )
         )
       )
-      
-      
-      
-    
-      )
+    )
   ),
   # Needed to plot the sparkline in DT
   htmlwidgets::getDependency("sparkline", "sparkline")
 )
 
 # server ---------------------------------------------------------------------------------------------------------------------
-server = function(input, output){
+server = function(input, output, session){
   
   # ~ server global ---------------------------------------------------------------------------------------------
   # By default, the file size limit is 5MB. It can be changed by
@@ -214,7 +244,7 @@ server = function(input, output){
     PrediObj = readRDS(inFile$datapath)
   })
   
-  output$pdpplot = DT::renderDataTable({
+  output$pdpplot = renderDT({
     # draw callback needed for sparklines
     cb = htmlwidgets::JS('function(){debugger;HTMLWidgets.staticRender();}')
     inFile = input$PrObj
@@ -484,8 +514,6 @@ server = function(input, output){
     )
   })
   
-  
-  
   # Explain all variables
   output$varExplanation = renderUI({
     inFile = input$PrObj
@@ -548,9 +576,8 @@ server = function(input, output){
       return(NULL)
     PrediObj = dataInput()
     PrediObj$data$get.xy()
+    
   })
-  
-  
   
   # Show shapley values of the specified instance in a data table
   output$shapleyValue = renderDT({
@@ -565,7 +592,6 @@ server = function(input, output){
     shapley$results[,c(1, 4, 2, 3)]
   })
   
-  
   # Show the plot of shapley values of the specified instance in a data table
   output$shapleyValuePlot = renderPlot({
     inFile = input$PrObj
@@ -576,17 +602,7 @@ server = function(input, output){
     x.interest = X[6,]
     model_data = Predictor$new(PrediObj$model, data = X)
     shapley = Shapley$new(predictor = model_data, x.interest = x.interest, sample.size = 100)
-    plot(shapley)
-  
-  })
-  # Scroll down to variable explanations
-  observeEvent(input$ctSend, {
-    js$pageCol (input$ctSend)
-  })
-  
-  # Scroll up to top of page
-  observeEvent(input$scrollUp, {
-    js$toTop (input$scrollUp)
+    shapley$plot()
   })
   
   # output$pred = renderText({
@@ -606,6 +622,9 @@ server = function(input, output){
   #              "</font>", "per unit. </br>"
   #   ))
   # })
+  
+
+  
 }
 
 
