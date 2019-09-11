@@ -591,9 +591,12 @@ server = function(input, output, session){
     inFile = input$PrObj
     if (is.null(inFile))
       return(NULL)
+    instance = input$instance 
+    if (is.null(instance))
+      return(NULL)
     PrediObj = dataInput()
     X = as.data.frame(PrediObj$data$get.x())
-    x.interest = X[6,]
+    x.interest = X[instance,]
     model_data = Predictor$new(PrediObj$model, data = X)
     shapley = Shapley$new(predictor = model_data, x.interest = x.interest, sample.size = 100)
     shapley$results[,c(1, 4, 2, 3)]
@@ -604,9 +607,12 @@ server = function(input, output, session){
     inFile = input$PrObj
     if (is.null(inFile))
       return(NULL)
+    instance = input$instance 
+    if (is.null(instance))
+      return(NULL)
     PrediObj = dataInput()
     X = as.data.frame(PrediObj$data$get.x())
-    x.interest = X[6,]
+    x.interest = X[instance,]
     model_data = Predictor$new(PrediObj$model, data = X)
     shapley = Shapley$new(predictor = model_data, x.interest = x.interest, sample.size = 100)
     shapley$plot()
