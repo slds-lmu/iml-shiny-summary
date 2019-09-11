@@ -21,6 +21,13 @@ ui = dashboardPage(
   ),
   
   dashboardBody(
+    tags$head(tags$style(HTML('
+      .main-header .logo {
+                              font-family: "Georgia", Times, "Times New Roman", serif;
+                              font-weight: bold;
+                              font-size: 19px;
+                              }
+                              '))),
     useShinyjs(),
     # needed to scroll up and down
     extendShinyjs(text = textsfile),
