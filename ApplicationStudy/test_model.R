@@ -10,6 +10,7 @@ saveRDS(PrediObj, file = "PrediObj.RDS")
 X = as.data.frame(PrediObj$data$get.x())
 x.interest = X[6,]
 model_data = Predictor$new(PrediObj$model, data = X)
+set.seed(seed = seed)
 shapley = Shapley$new(predictor = model_data, x.interest = x.interest, sample.size = 100)
 plot(shapley)
 shapley$results[,c(1, 4, 2)]

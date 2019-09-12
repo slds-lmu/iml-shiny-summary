@@ -169,7 +169,23 @@ ui = dashboardPage(
               # collapsible=TRUE,
               title = "Select an instance that you want to calculate the shapley values and plot",#, br(), "More box content",
               textInput("instance", "instance:")
-            )
+            ),
+            box(
+              width = NULL,
+              solidHeader = TRUE,
+              # background = "black",
+              # collapsible=TRUE,
+              title = "Give the number of Monte Carlo samples for estimating the Shapley value.",#, br(), "More box content",
+              textInput("nr_sv", "number:")
+            ),
+            box(
+              width = NULL,
+              solidHeader = TRUE,
+              # background = "black",
+              # collapsible=TRUE,
+              title = "set seed for Monte Carlo samples for estimating the Shapley value.",#, br(), "More box content",
+              textInput("seed", "seed:")
+            ) 
           ),
           
           
@@ -250,6 +266,8 @@ server = function(input, output, session){
     inFile = input$PrObj
     PrediObj = readRDS(inFile$datapath)
   })
+  
+  
   
   output$pdpplot = renderDT({
     # draw callback needed for sparklines
@@ -586,35 +604,38 @@ server = function(input, output, session){
     
   })
   
-  # Show shapley values of the specified instance in a data table
-  output$shapleyValue = renderDT({
+  shapleyValue = reactive({
     inFile = input$PrObj
     if (is.null(inFile))
       return(NULL)
     instance = input$instance 
     if (is.null(instance))
       return(NULL)
-    PrediObj = dataInput()
+    sampleSize = input$nr_sv
+    if (is.null(sampleSize))
+      return(NULL)
+    Seed = input$seed
+    if (is.null(Seed))
+      return(NULL)
+    PrediObj = readRDS(inFile$datapath)
     X = as.data.frame(PrediObj$data$get.x())
     x.interest = X[instance,]
     model_data = Predictor$new(PrediObj$model, data = X)
-    shapley = Shapley$new(predictor = model_data, x.interest = x.interest, sample.size = 100)
+    set.seed(seed = Seed)
+    shapley = Shapley$new(predictor = model_data, x.interest = x.interest, sample.size = sampleSize)
+    
+  })
+  
+  
+  # Show shapley values of the specified instance in a data table
+  output$shapleyValue = renderDT({
+    shapley = shapleyValue()
     shapley$results[,c(1, 4, 2, 3)]
   })
   
   # Show the plot of shapley values of the specified instance in a data table
   output$shapleyValuePlot = renderPlot({
-    inFile = input$PrObj
-    if (is.null(inFile))
-      return(NULL)
-    instance = input$instance 
-    if (is.null(instance))
-      return(NULL)
-    PrediObj = dataInput()
-    X = as.data.frame(PrediObj$data$get.x())
-    x.interest = X[instance,]
-    model_data = Predictor$new(PrediObj$model, data = X)
-    shapley = Shapley$new(predictor = model_data, x.interest = x.interest, sample.size = 100)
+    shapley = shapleyValue()
     shapley$plot()
   })
   
