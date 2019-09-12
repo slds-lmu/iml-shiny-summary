@@ -74,13 +74,18 @@ ui = dashboardPage(
         tabName = "global",
         fluidRow(
           column(width = 12,
-                 ## upload a RDS. file 
-                 fluidRow(titlePanel("Save your Predictor Object that created from iml package 
-                           as PrediObj.RDS and upload this file"),
-                  sidebarLayout(
-                  sidebarPanel(fileInput('PrObj', 'Choose file to upload',accept = c('RDS.','rds.'))),
-                  mainPanel(tableOutput('uploadFilePredi')) ## can't delete  and make no sense
-                  )
+                 box(
+                   width = NULL,
+                   solidHeader = TRUE,
+                   h2("Save your Predictor Object that created from iml package 
+                           as PrediObj.RDS and upload this file", 
+                      style = "text-align: center"),
+                  
+                  box(
+                    solidHeader = TRUE,
+                    fileInput('PrObj', 'Choose file to upload',accept = c('RDS.','rds.')))
+                  
+                  
                  ),
             ## describe PDP
             fluidRow(
@@ -150,17 +155,22 @@ ui = dashboardPage(
       tabItem(
         tabName = "local",
         fluidRow(
-          
-          column(
-            width = 12,
+          sidebarPanel(
+            # Input: Numeric entry for number of obs to view ----
+            numericInput(inputId = "obs",
+                         label = "Number of observations to view:",
+                         value = 10)# default = 10
+          ),
+          mainPanel(
+            # width = 12,
             box(
               width = NULL,
               title = "Your data",
               solidHeader = TRUE,
               DT::dataTableOutput("df"))
           ),
-          
-          
+          column(
+            width = 12,
             box(
               width = 4,
               solidHeader = TRUE,
@@ -183,16 +193,15 @@ ui = dashboardPage(
               # background = "black",
               # collapsible=TRUE,
               title = "set seed for Monte Carlo samples for estimating the Shapley value.",#, br(), "More box content",
-              textInput("seed", "seed:"),
-              actionButton('goPlot', 'Go plot'),
-              actionButton('goTabel', 'Go tabel')
-              
-            ),
+              textInput("seed", "seed:")
+              # actionButton('goPlot', 'Go plot'),
+              # actionButton('goTabel', 'Go tabel')
+              # 
+            )),
           column(
             width = 9,
             tabsetPanel(
               id = "tabPanelId",
-              
               tabPanel(
                 # This tab allows to set up individual values for all features
                 "Output of shapley value",
@@ -214,7 +223,6 @@ ui = dashboardPage(
                   # Tabs with variable explanations
                   column(
                     width = 12,
-                    
                     box(
                       width = NULL,
                       title = "Plot with Shapley Values",
@@ -263,6 +271,8 @@ server = function(input, output, session){
   
   dataInput = reactive({
     inFile = input$PrObj
+    if (is.null(inFile))
+      return(NULL)
     PrediObj = readRDS(inFile$datapath)
   })
   
@@ -595,11 +605,9 @@ server = function(input, output, session){
   # ~ server local --------------------------------------------------------------------------------
   # show the data in a data table
   output$df = renderDT({
-        inFile = input$PrObj
-    if (is.null(inFile))
-      return(NULL)
     PrediObj = dataInput()
-    PrediObj$data$get.xy()
+    head( PrediObj$data$get.xy(), n = input$obs)
+   
     
   })
   
@@ -634,6 +642,8 @@ server = function(input, output, session){
   
   # Show the plot of shapley values of the specified instance in a data table
   output$shapleyValuePlot = renderPlot({
+    # input$goPlot 
+    # withProgress(message = 'Making plot', value = 0,  shapley = shapleyValue())
     shapley = shapleyValue()
     shapley$plot()
   })
