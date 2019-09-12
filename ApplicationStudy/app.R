@@ -160,10 +160,9 @@ ui = dashboardPage(
               DT::dataTableOutput("df"))
           ),
           
-          column(
-            width = 12,
+          
             box(
-              width = NULL,
+              width = 4,
               solidHeader = TRUE,
               # background = "black",
               # collapsible=TRUE,
@@ -171,7 +170,7 @@ ui = dashboardPage(
               textInput("instance", "instance:")
             ),
             box(
-              width = NULL,
+              width = 4,
               solidHeader = TRUE,
               # background = "black",
               # collapsible=TRUE,
@@ -179,16 +178,16 @@ ui = dashboardPage(
               textInput("nr_sv", "number:")
             ),
             box(
-              width = NULL,
+              width = 4,
               solidHeader = TRUE,
               # background = "black",
               # collapsible=TRUE,
               title = "set seed for Monte Carlo samples for estimating the Shapley value.",#, br(), "More box content",
-              textInput("seed", "seed:")
-            ) 
-          ),
-          
-          
+              textInput("seed", "seed:"),
+              actionButton('goPlot', 'Go plot'),
+              actionButton('goTabel', 'Go tabel')
+              
+            ),
           column(
             width = 9,
             tabsetPanel(
@@ -220,7 +219,7 @@ ui = dashboardPage(
                       width = NULL,
                       title = "Plot with Shapley Values",
                       solidHeader = TRUE,
-                      plotOutput("shapleyValuePlot", width = "82%", height = "400px", click = NULL,
+                      plotOutput("shapleyValuePlot", width = "100%", height = "400px", click = NULL,
                                  dblclick = NULL, hover = NULL, hoverDelay = NULL,
                                  hoverDelayType = NULL, brush = NULL, clickId = NULL,
                                  hoverId = NULL, inline = FALSE)
