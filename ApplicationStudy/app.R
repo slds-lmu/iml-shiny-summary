@@ -244,7 +244,7 @@ ui = dashboardPage(
             width = 3,
             box(
               width = NULL,
-              
+              solidHeader = TRUE,
               h4("Links for more Explanations"),
               HTML(paste("
                          <b>Shapley Values</b>
@@ -271,8 +271,9 @@ server = function(input, output, session){
   
   dataInput = reactive({
     inFile = input$PrObj
-    if (is.null(inFile))
-      return(NULL)
+    validate(
+      need(input$PrObj != "", "Please upload your predictor object")
+    )
     PrediObj = readRDS(inFile$datapath)
   })
   
@@ -606,6 +607,10 @@ server = function(input, output, session){
   # show the data in a data table
   output$df = renderDT({
     PrediObj = dataInput()
+    validate(
+      need(input$obs != "", "Number of observations is missing."),
+      need(input$obs > 0, "Number of observations should be a positive integer.")
+    )
     head( PrediObj$data$get.xy(), n = input$obs)
    
     
@@ -613,17 +618,26 @@ server = function(input, output, session){
   
   shapleyValue = reactive({
     inFile = input$PrObj
-    if (is.null(inFile))
-      return(NULL)
+    validate(
+      need(inFile != "", "Please upload your predictor object.")
+    )
     instance = input$instance 
-    if (is.null(instance))
-      return(NULL)
+    validate(
+      need(instance != "", "Please give an instance."),
+      need(instance > 0, "Instance should be a positive integer.")
+    )
+   
     sampleSize = input$nr_sv
-    if (is.null(sampleSize))
-      return(NULL)
+    validate(
+      need(sampleSize != "", "Please give a sample size."),
+      need(sampleSize > 0, "Sample size should be a positive integer.")
+      
+    )
     Seed = input$seed
-    if (is.null(Seed))
-      return(NULL)
+    validate(
+      need(Seed != "", "Please give a seed."),
+      need(Seed > 0, "Seed should be a positive integer.")
+    )
     PrediObj = readRDS(inFile$datapath)
     X = as.data.frame(PrediObj$data$get.x())
     x.interest = X[instance,]
