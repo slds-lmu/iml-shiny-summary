@@ -55,10 +55,10 @@ ui = dashboardPage(
                 the Munich Rent Index). The dashboard provides an summary for your model with Interpretable Machine Learning.
                 
                 There is a right-click menu. Click Global Effects, save your predictor object as .RDS file and upload it. Then, 
-                your get a table in few minutes, which includes variables' names,corresponding value ranges, partial dependence 
+                you get a table in few minutes, which includes variables' names,corresponding value ranges, partial dependence 
                 plots(PDPs) and their feature importance.
                 Click Local Interpretation, you will see the data set on the top. Then, if you select a certain row, the corresponding
-                shapley values and its plot will be shown automatically as follows")),
+                shapley values and its plot will be shown automatically as follows.")),
             br(),
             tags$a(href="https://christophm.github.io/interpretable-ml-book/", "iml book by Christoph Molnar"),
             br(),
