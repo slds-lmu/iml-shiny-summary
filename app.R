@@ -416,7 +416,7 @@ server = function(input, output, session){
       
       
       if(length(one.row)>1){{
-          incProgress(1/n, detail = paste("Doing part(factor variables)", i))}
+          incProgress(detail = paste("Doing part(factor variables)", i))}
         for (i in 2:length(one.row)){
           spark.data = add_row(spark.data, 
                                Feature = feat[[i]], 
