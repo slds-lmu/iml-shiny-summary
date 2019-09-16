@@ -8,6 +8,3 @@ mod.mlr = train(learner, task)
 PrediObj = Predictor$new(mod.mlr, data = BostonHousing)
 saveRDS(PrediObj, file = "PrediObj.RDS")
 
-
-x = PrediObj$data$get.x()
-size.data = dim(x)[1]

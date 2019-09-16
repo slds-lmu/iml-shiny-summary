@@ -327,17 +327,14 @@ server = function(input, output, session){
       
       #  for factor variables -----------------------------------------------
       pd.list = c()
-      
-      for (i in 1:length(fac.var)){
+      pd.list = lapply(1:length(fac.var), function(i){
         dat.type = "factor"
-        # calculate partial dependence data
+        # feature importance per variable
+        fi.var = fi.res[fi.res$feature == fac.var[i], ]$importance
+        # calculate partial dependence dat
         pdr = FeatureEffect$new(PrediObj, fac.var[i], method = "pdp")$results
         # sort by name that colors can be set correctly
         pdr = pdr[order(pdr[, 1]), ]
-        # pd = pdr$.y.hat
-        # feature importance per variable
-        fi.var = fi.res[fi.res$feature == fac.var[i], ]$importance
-        fi.var = round(fi.var, 4)
         # Aim: highlight pdp bar for factor variables, all other bars 
         # have the same color
         var.res = as.data.frame(diag(x = 1, nrow = nlevels(dat[,fac.var[i]]), 
@@ -347,21 +344,15 @@ server = function(input, output, session){
           pdr$color.map[j] = paste(as.vector(unlist(var.res[j,])), 
                                    collapse = ",")
         }
-        pd.list[[i]] = as.data.frame(c(dat.type, fi.var, pdr))
-        
-        # add colnames for dat.type, at the moment X.factor. or X.numeric.
-        names(pd.list[[i]])[1] = "dat.type"
-        names(pd.list[[i]])[2] = "fi.var"
-        names(pd.list[[i]])[3] = "vari.values"
-        # add new names per variable 
-        pd.list[[i]]$Feature = paste0(fac.var[i], pd.list[[i]]$vari.values) 
-        
         print(paste(i, "from", length(fac.var)))
+        pd.list = as.data.frame(c(dat.type, round(fi.var, 4), pdr), 
+                                col.names = c("dat.type", "fi.var", 
+                                              "vari.values", ".y.hat",
+                                              ".type", "color.map"))
         
-      }
-      
-      
-      
+        pd.list$ Feature = paste0(fac.var[i], pdr[,1])
+        pd.list
+      })
       
       one.row = c()
       for (j in 1:length(pd.list)){
@@ -372,20 +363,20 @@ server = function(input, output, session){
       }
       
       feat = c()
-      for (i in 1:length(one.row)){
-        feat[[i]]= as.character(one.row[[i]]$Feature)
-      }
+      feat = sapply(1:length(one.row), function(u){
+        feat = as.character(one.row[[u]]$Feature)
+      })
       
       val = c()
-      for (i in 1:length(one.row)){
-        val[[i]] = as.character(one.row[[i]]$vari.values) 
-      }
-      
+      val = sapply(1:length(one.row), function(o){
+        val = as.character(one.row[[o]]$vari.values)
+      })
       
       fi = c()
-      for (i in 1:length(one.row)){
-        fi[[i]] = one.row[[i]]$fi.var
-      }
+      fi = sapply(1:length(one.row), function(e){
+        fi = one.row[[e]]$fi.var
+      })
+      
       
       pd.content = c()
       col.map = c()
@@ -424,7 +415,8 @@ server = function(input, output, session){
                           FeatureImportance = fi[[1]])
       
       
-      if(length(one.row)>1){
+      if(length(one.row)>1){{
+          incProgress(1/n, detail = paste("Doing part(factor variables)", i))}
         for (i in 2:length(one.row)){
           spark.data = add_row(spark.data, 
                                Feature = feat[[i]], 
@@ -438,62 +430,58 @@ server = function(input, output, session){
       
       #  for numeric variables -----------------------------------------------
       pd.list.n = c()
-      
-      for (i in 1:length(num.var)){
+      pd.list.n = lapply(1:length(num.var), function(i){
         dat.type = "numeric"
         # feature importance per variable
         fi.var = fi.res[fi.res$feature == num.var[i], ]$importance
-        fi.var = round(fi.var, 4)
         # calculate partial dependence data
         # pd = Partial$new(p, num.var[i], ice = FALSE)$results
         pdr = FeatureEffect$new(PrediObj, num.var[i], method = "pdp")$results
         pdr = pdr[order(pdr[, 1]), ]
-        pd = pdr$.y.hat
-        
         # No different colors for numeric features
         pdr$color.map = 1
-        
         # dummy feat ----
-        pd.list.n[[i]] = as.data.frame(c(dat.type, fi.var, pdr))
-        # add colnames for dat.type, at the moment X.factor. or X.numeric.
-        names(pd.list.n[[i]])[1] = "dat.type"
-        names(pd.list.n[[i]])[2] = "fi.var"
-        names(pd.list.n[[i]])[3] = "vari.values"
+        pd.list.n = as.data.frame(c(dat.type, round(fi.var, 4), pdr), 
+                                  col.names = c("dat.type", "fi.var", 
+                                                "vari.values", ".y.hat", ".type", 
+                                                "color.map"))
         # add new names per variable 
-        pd.list.n[[i]]$Feature = num.var[i]
-        print(paste(i, "from", length(num.var)))
-      }
+        pd.list.n$Feature = num.var[i]
+        pd.list.n
+      })
+      
+      # one.row = c()
+      # for (j in 1:length(pd.list.n)){
+      #   for (i in 1:nrow(pd.list.n[[j]])){  ###   nrow(pd.list[[j]])   ---> N ULL???????????
+      #     element.name = as.character(pd.list.n[[j]]$Feature[i])
+      #     one.row[[element.name]] = as.data.frame(pd.list.n[[j]][i, ]) # rlist package
+      #   }
+      # }
       
       one.row = c()
-      for (j in 1:length(pd.list.n)){
-        for (i in 1:nrow(pd.list.n[[j]])){  ###   nrow(pd.list[[j]])   ---> N ULL???????????
-          element.name = as.character(pd.list.n[[j]]$Feature[i])
-          one.row[[element.name]] = as.data.frame(pd.list.n[[j]][i, ]) # rlist package
-        }
-      }
+      one.row = lapply(1:length(pd.list.n), function(j){
+        last.row = nrow(pd.list.n[[j]])
+        one.row = as.data.frame(pd.list.n[[j]][last.row,])
+      })
       
       feat = c()
-      for (i in 1:length(one.row)){
-        feat[[i]]  = as.character(one.row[[i]]$Feature)
-        
-      }
+      feat = sapply(1:length(one.row), function(u){
+        feat = as.character(one.row[[u]]$Feature)
+      })
       
       val = c()
-      for (i in 1:length(one.row)){
-        ft = as.character(one.row[[i]]$Feature)
-        val[[i]] = paste("Value ranges from", min(dat[[ft]]), "to", max(dat[[ft]]))
-      }
-      
+      val = sapply(1:length(one.row), function(o){
+        ft = as.character(one.row[[o]]$Feature)
+        val= paste("Value ranges from", min(dat[[ft]]), "to", max(dat[[ft]]))
+      })
       
       fi = c()
-      for (i in 1:length(one.row)){
-        fi[[i]] = one.row[[i]]$fi.var
-      }
+      fi = sapply(1:length(one.row), function(e){
+        fi = one.row[[e]]$fi.var
+      })
       
       pd.content = c()
-      
       for (i in 1:length(one.row)){
-        
         pd.content[[i]] = spk_chr(
           unlist(dropNamed(
             one.row[[i]], 
@@ -506,9 +494,23 @@ server = function(input, output, session){
           spotColor = "#fc00a8"
         )
       }
-      
+      # pd.content = c()
+      # pd.content = sapply(1:length(one.row), function(e){
+      #   pd.content = spk_chr(
+      #     unlist(dropNamed(
+      #       one.row[[i]], 
+      #       drop = c("dat.type", "Feature", "color.map", "fi.var")),
+      #       use.names = FALSE),
+      #     lineColor = "#337ab7",
+      #     type = "line",
+      #     minSpotColor = "#fc00a8",
+      #     maxSpotColor = "#fc00a8",
+      #     spotColor = "#fc00a8"
+      #   )
+      # })
+        
       for (i in 1:length(one.row)){{
-        incProgress(1/n, detail = paste("Doing part", i))
+        incProgress(1/n, detail = paste("Doing part(numeric variables)", i))
         spark.data = add_row(spark.data, 
                              Feature = feat[[i]], 
                              Value = val[[i]],
