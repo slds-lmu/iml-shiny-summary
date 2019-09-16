@@ -277,17 +277,7 @@ server = function(input, output, session){
     PrediObj = readRDS(inFile$datapath)
   })
   
-  
-  
-  output$pdpplot = renderDT({
-    # draw callback needed for sparklines
-    cb = htmlwidgets::JS('function(){debugger;HTMLWidgets.staticRender();}')
-    inFile = input$PrObj
-    if (is.null(inFile))
-      return(NULL)
-    # https://stackoverflow.com/questions/20875081/properly-rendering-sparklines-in-a-datatable 
-    # input$Prdi  will be NULL initially. After the user selects
-    # and uploads a file.
+  pdpBigPlot = reactive({
     PrediObj = dataInput()
     x = PrediObj$data$get.x()
     target = PrediObj$data$y
@@ -295,6 +285,17 @@ server = function(input, output, session){
     dat = as.data.frame(cbind(x,target))
     mod = PrediObj$model
     pd.big = pdPlot(p = PrediObj, mod, x, target)
+  })
+  
+  
+  output$pdpplot = renderDT({
+    # draw callback needed for sparklines
+    cb = htmlwidgets::JS('function(){debugger;HTMLWidgets.staticRender();}')
+    PrediObj = dataInput()
+    x = PrediObj$data$get.x()
+    target = PrediObj$data$y
+    dat = as.data.frame(cbind(x,target))
+    pd.big = pdpBigPlot()
     
     # var.names = colnames(x)
     dat.type = as.data.frame(sapply(x, class))
@@ -551,15 +552,9 @@ server = function(input, output, session){
   
   # Explain all variables
   output$varExplanation = renderUI({
-    inFile = input$PrObj
-    if (is.null(inFile))
-      return(NULL)
     PrediObj = dataInput()
-    x= PrediObj$data$get.x()
-    target = PrediObj$data$y
-    dat = PrediObj$data$get.xy()
-    mod = PrediObj$model
-    pd.big = pdPlot(p = PrediObj, mod, x, target)
+    x = PrediObj$data$get.x()
+    pd.big = pdpBigPlot()
     
     # reorder variables -- name
     feat.name = as.data.frame(names(x))
