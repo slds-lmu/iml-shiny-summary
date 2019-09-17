@@ -97,7 +97,7 @@ ui = dashboardPage(
                   HTML("")
                 ),
                 
-                actionButton('goTable', 'Go table'),
+                # actionButton('goTable', 'Go table'),
                 
                 # table
                 box(
@@ -288,7 +288,7 @@ server = function(input, output, session){
   
   
   output$pdpplot = renderDT({
-    input$goTable
+    # input$goTable
     # draw callback needed for sparklines
     cb = htmlwidgets::JS('function(){debugger;HTMLWidgets.staticRender();}')
     PrediObj = dataInput()
