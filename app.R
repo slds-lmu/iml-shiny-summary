@@ -507,12 +507,12 @@ server = function(input, output, session){
           spotColor = "#fc00a8"
         )
       }
-      # pd.content = c()
-      # pd.content = sapply(1:length(one.row), function(e){
-      #   pd.content = spk_chr(
+      # pd.contentn = c()
+      # pd.contentn = sapply(1:length(one.row), function(e){
+      #   pd.contentn = spk_chr(
       #     unlist(dropNamed(
-      #       one.row[[i]], 
-      #       drop = c("dat.type", "Feature", "color.map", "fi.var")),
+      #       one.row[[e]],
+      #       drop = c("dat.type", "fi.var", "Feature", "color.map", "var.name")),
       #       use.names = FALSE),
       #     lineColor = "#337ab7",
       #     type = "line",
@@ -520,8 +520,9 @@ server = function(input, output, session){
       #     maxSpotColor = "#fc00a8",
       #     spotColor = "#fc00a8"
       #   )
+      #   pd.contentn
       # })
-        
+      #   
       for (i in 1:length(one.row)){{
         incProgress(1/n, detail = paste("Doing part(numeric variables)", i))
         spark.data = add_row(spark.data, 
