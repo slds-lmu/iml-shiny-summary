@@ -335,6 +335,8 @@ server = function(input, output, session){
         pdr = FeatureEffect$new(PrediObj, fac.var[i], method = "pdp")$results
         # sort by name that colors can be set correctly
         pdr = pdr[order(pdr[, 1]), ]
+        pdr.y = pdr$.y.hat
+        
         # Aim: highlight pdp bar for factor variables, all other bars 
         # have the same color
         var.res = as.data.frame(diag(x = 1, nrow = nlevels(dat[,fac.var[i]]), 
@@ -345,12 +347,15 @@ server = function(input, output, session){
                                    collapse = ",")
         }
         print(paste(i, "from", length(fac.var)))
-        pd.list = as.data.frame(c(dat.type, round(fi.var, 4), pdr), 
-                                col.names = c("dat.type", "fi.var", 
-                                              "vari.values", ".y.hat",
-                                              ".type", "color.map"))
-        
-        pd.list$ Feature = paste0(fac.var[i], pdr[,1])
+        df = pdr[,c(1,4)]
+        df[,1] =  paste0(fac.var[i], df[,1])
+        var.name = fac.var[i]
+        colnames(df)[1] = "Feature"
+        pd.list = as.data.frame(c(dat.type, fi.var, df, var.name, pdr.y))
+        # add colnames for dat.type, at the moment X.factor. or X.numeric.
+        names(pd.list)[1] = "dat.type"
+        names(pd.list)[2] = "fi.var"
+        names(pd.list)[5] = "var.name"
         pd.list
       })
       
@@ -364,12 +369,12 @@ server = function(input, output, session){
       
       feat = c()
       feat = sapply(1:length(one.row), function(u){
-        feat = as.character(one.row[[u]]$Feature)
+        feat = as.character(one.row[[u]]$var.name)
       })
       
       val = c()
       val = sapply(1:length(one.row), function(o){
-        val = as.character(one.row[[o]]$vari.values)
+        val = as.character(one.row[[o]]$Feature)
       })
       
       fi = c()
@@ -400,7 +405,7 @@ server = function(input, output, session){
         pd.content[[i]] = spk_chr(
           unlist(dropNamed(
             one.row[[i]], 
-            drop = c("dat.type", "Feature",  "color.map", "fi.var")),
+            drop = c("dat.type", "fi.var", "Feature",  "color.map",  "var.name")),
             use.names = FALSE),
           type = "bar", colorMap = col.map[k:iter]
         )
