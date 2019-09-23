@@ -323,8 +323,7 @@ server = function(input, output, session){
     withProgress(message = 'Making table', value = 0, {
       # Number of times we'll go through the loop
       n <- size.data
-      
-      
+
       #  for factor variables -----------------------------------------------
       pd.list = c()
       pd.list = lapply(1:length(fac.var), function(i){
@@ -443,15 +442,25 @@ server = function(input, output, session){
         # pd = Partial$new(p, num.var[i], ice = FALSE)$results
         pdr = FeatureEffect$new(PrediObj, num.var[i], method = "pdp")$results
         pdr = pdr[order(pdr[, 1]), ]
+        pdr.y = pdr$.y.hat
+        
         # No different colors for numeric features
         pdr$color.map = 1
+        
+        df = pdr[,c(1,4)]
+        print(paste(i, "from", length(num.var), "--", num.var[i]))
+       
+        
+        var.name  = as.character(num.var[i])
+        df[,1] =  paste("Value ranges from", min(dat[[var.name]]), "to", max(dat[[var.name]]))
+       
+        colnames(df)[1] = "Feature"
         # dummy feat ----
-        pd.list.n = as.data.frame(c(dat.type, round(fi.var, 4), pdr), 
-                                  col.names = c("dat.type", "fi.var", 
-                                                "vari.values", ".y.hat", ".type", 
-                                                "color.map"))
+        pd.list.n = as.data.frame(c(dat.type, round(fi.var, 4), df, var.name, pdr.y))
+        names(pd.list.n)[1] = "dat.type"
+        names(pd.list.n)[2] = "fi.var"
+        names(pd.list.n)[5] = "var.name"
         # add new names per variable 
-        pd.list.n$Feature = num.var[i]
         pd.list.n
       })
       
@@ -471,13 +480,12 @@ server = function(input, output, session){
       
       feat = c()
       feat = sapply(1:length(one.row), function(u){
-        feat = as.character(one.row[[u]]$Feature)
+        feat = as.character(one.row[[u]]$var.name)
       })
       
       val = c()
       val = sapply(1:length(one.row), function(o){
-        ft = as.character(one.row[[o]]$Feature)
-        val= paste("Value ranges from", min(dat[[ft]]), "to", max(dat[[ft]]))
+        val= as.character(one.row[[o]]$Feature)
       })
       
       fi = c()
@@ -490,7 +498,7 @@ server = function(input, output, session){
         pd.content[[i]] = spk_chr(
           unlist(dropNamed(
             one.row[[i]], 
-            drop = c("dat.type", "Feature", "color.map", "fi.var")),
+            drop = c("dat.type", "fi.var", "Feature", "color.map", "var.name")),
             use.names = FALSE),
           lineColor = "#337ab7",
           type = "line",
