@@ -40,8 +40,8 @@ library(iml)
 # install.packages("checkmate") 
 library(checkmate) 
 
-# devtools::install_github("compstat-lmu/ame")
-library(ame) # ame changes
+# # devtools::install_github("compstat-lmu/ame")
+# library(ame) # ame changes
 
 # install.packages("sensitivity")
 # library(sensitivity) # morris method

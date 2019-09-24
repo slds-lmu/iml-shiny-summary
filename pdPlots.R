@@ -27,7 +27,7 @@ pdPlot = function(p, mod, x, target){
         plot = ggplot(pd, aes(reorder(org.val, yhat), yhat)) + 
           geom_bar(stat="identity", fill="#337ab7") + 
           theme_classic() +
-          ylab("Rent / sqm") + xlab(feat.name$feat[i]) +
+          ylab("target") + xlab(feat.name$feat[i]) +
           ggtitle("Partial Dependence Plot") +
           theme(axis.text.x = element_text(angle = 45, hjust = 1),
                 plot.title = element_text(hjust = 0.5)) +
@@ -37,7 +37,7 @@ pdPlot = function(p, mod, x, target){
         plot = ggplot(pd, aes(reorder(org.val, yhat), yhat)) + 
           geom_bar(stat="identity", fill="#337ab7") + 
           theme_classic() +
-          ylab("Rent / sqm") + xlab(feat.name$feat[i]) +
+          ylab("target") + xlab(feat.name$feat[i]) +
           ggtitle("Partial Dependence Plot") +
           theme(plot.title = element_text(hjust = 0.5)) +
           geom_text(aes(label = round(yhat, 2), y = yhat + 0.02),
