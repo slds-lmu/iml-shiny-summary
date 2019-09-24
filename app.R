@@ -295,7 +295,6 @@ server = function(input, output, session){
     x = PrediObj$data$get.x()
     target = PrediObj$data$y
     dat = as.data.frame(PrediObj$data$get.xy())
-    pd.big = pdpBigPlot()
     # var.names = colnames(x)
     dat.type = as.data.frame(sapply(x, class))
     num.var = rownames(dat.type)[dat.type[,1] =="numeric"]
