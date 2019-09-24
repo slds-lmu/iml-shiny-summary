@@ -1,10 +1,10 @@
 rm(list = ls(all.names = T))
-source("pdPlots.R") 
-source("libraries.R") 
-data(BostonHousing, package = "mlbench")
-task = makeRegrTask(id = "bh", data = BostonHousing, target = "medv")
-learner =regr.lrn = makeLearner("regr.gbm", par.vals = list(n.trees = 500, interaction.depth = 3))
-mod.mlr = train(learner, task)
-PrediObj = Predictor$new(mod.mlr, data = BostonHousing)
-saveRDS(PrediObj, file = "PrediObj.RDS")
 
+library(iml)
+library(mlr)
+lrn = makeLearner("regr.rpart")
+tsk = bh.task
+dat = getTaskData(bh.task)
+mod = train(lrn, tsk)
+pred = Predictor$new(mod, dat)
+saveRDS(pred, file = "example/pred.RDS")
