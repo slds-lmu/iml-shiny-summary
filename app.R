@@ -684,7 +684,7 @@ server = function(input, output, session){
       need(Seed > 0, "Seed should be a positive integer.")
     )
     PrediObj = readRDS(inFile$datapath)
-    X = as.data.frame(PrediObj$data$get.x())
+    X = as.data.frame(x)
     x.interest = X[instance,]
     model_data = Predictor$new(PrediObj$model, data = X)
     set.seed(seed = Seed)
