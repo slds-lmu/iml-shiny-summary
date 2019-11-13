@@ -135,6 +135,16 @@ ui = dashboardPage(
                 )
               ),
               
+              column(
+                width = 12,
+                box(
+                  width = NULL,
+                  solidHeader = TRUE,
+                  title = "Feature importance",
+                  plotOutput("impplot")
+                )
+              ),
+              
               # Tabs with variable explanations
               column(
                 width = 12,
@@ -588,13 +598,19 @@ server = function(input, output, session){
   )
 })
   
-  
-  
-  
+
   
   output$pdpplot = renderDT({
     spark.df()
   })
+  
+  
+  output$impplot = renderPlot({
+    PrediObj = dataInput()
+    fi = FeatureImp$new(PrediObj, loss = "mae", n.repetitions = 20)
+    plot(fi)
+  })
+  
   
   # Explain all variables
   output$varExplanation = renderUI({
