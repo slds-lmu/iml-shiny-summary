@@ -2,7 +2,13 @@
 iml--summary
 ============
 
-This dashboard provides an iml-summary for your data.
+This dashboard provides an iml-summary for your data. The app shows the partial dependence plots and permutation feature important for any machine learning model. It can also explain individual predictions with Shapley Values.
+
+![](WWW/screenshot0.png "this is the screenshot of an example")
+
+![](WWW/screenshot1.png "this is the screenshot of an example")
+
+![](WWW/screenshot2.png "this is the screenshot of an example")
 
 File Structure
 --------------
@@ -19,7 +25,8 @@ The general structure of this repo does have the following tree :
     |
     └───libraries
 
-### How to use
+How to use
+----------
 
 You can use this shinydashboard app for your predictor object (R6Class object), which should hold any machine learning model (mlr, caret, randomForest, ...) and the data to be used of analysing the model. The package iml and mlr can help you. There is an example of R code how to produce an `.RDS` model object with iml and mlr as below.
 
