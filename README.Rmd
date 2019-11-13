@@ -5,11 +5,11 @@
 
 This dashboard provides an iml-summary for your data. The app shows the partial dependence plots and permutation feature important for any machine learning model. It can also explain individual predictions with Shapley Values.
 
-![](WWW/screenshot0.png "this is the screenshot of an example")
+![](www/screenshot0.png "this is the screenshot of an example")
 
-![](WWW/screenshot1.png "this is the screenshot of an example")
+![](www/screenshot1.png "this is the screenshot of an example")
 
-![](WWW/screenshot2.png "this is the screenshot of an example")
+![](www/screenshot2.png "this is the screenshot of an example")
 
 
 
